@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EmployeeManagement</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+
+    <!-- Site-wide styles -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Custom Employee Management Styles -->
+    <link rel="stylesheet" href="~/css/EmployeeManagement.styles.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EmployeeManagement</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Container with Sidebar and Content -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Section -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">
+                                <span class="bi bi-house-door"></span> <!-- Bootstrap icon for home -->
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Employees" asp-action="Index">
+                                <span class="bi bi-file-earmark"></span> <!-- Bootstrap icon for file -->
+                                Employee List
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Employees" asp-action="Create">
+                                <span class="bi bi-person-plus"></span> <!-- Bootstrap icon for adding employee -->
+                                Add Employee
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">@ViewData["Title"]</h1>
+                </div>
+                <!-- Main content rendered from view -->
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="border-top footer text-muted mt-4">
+        <div class="container">
+            &copy; 2024 - EmployeeManagement - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <!-- jQuery and Bootstrap JavaScript -->
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+
+    <!-- Site-wide JavaScript -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Optional Scripts Section -->
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

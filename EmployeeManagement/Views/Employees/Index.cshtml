@@ -1,0 +1,93 @@
+﻿@model PaginatedList<Employee>
+
+@{
+    ViewData["Title"] = "Employee List";
+}
+
+<h2>Employee List</h2>
+
+<!-- Search Form -->
+<form asp-controller="Employees" asp-action="Index" method="get">
+    <div class="form-group">
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Search by name or email" class="form-control" />
+        <input type="submit" value="Search" class="btn btn-primary mt-2" />
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">First Name</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]">Email</a>
+            </th>
+            <th>Mobile</th>
+            <th>Date of Birth</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var employee in Model)
+        {
+            <tr>
+                <td>@employee.FirstName @employee.LastName</td>
+                <td>@employee.Email</td>
+                <td>@employee.Mobile</td>
+                <td>@employee.DateOfBirth.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@employee.Id" class="btn btn-warning">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@employee.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pagination Controls -->
+<nav>
+    <ul class="pagination">
+        @if (Model.HasPreviousPage)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)">Previous</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == Model.PageIndex)
+            {
+                <li class="page-item active">
+                    <span class="page-link">@i</span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)">Next</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        }
+    </ul>
+</nav>
