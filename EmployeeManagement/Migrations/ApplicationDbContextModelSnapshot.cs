@@ -49,10 +49,6 @@ namespace EmployeeManagement.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Photo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Employees");

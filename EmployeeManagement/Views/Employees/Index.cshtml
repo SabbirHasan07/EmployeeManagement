@@ -4,13 +4,26 @@
     ViewData["Title"] = "Employee List";
 }
 
-<h2>Employee List</h2>
-
 <!-- Search Form -->
-<form asp-controller="Employees" asp-action="Index" method="get">
-    <div class="form-group">
-        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Search by name or email" class="form-control" />
-        <input type="submit" value="Search" class="btn btn-primary mt-2" />
+<form asp-controller="Employees" asp-action="Index" method="get" class="d-flex flex-wrap mb-4">
+    <div class="form-group flex-grow-1 me-2">
+        <label for="nameSearch" class="form-label">Search by Full Name:</label>
+        <input type="text" id="nameSearch" name="nameSearch" value="@ViewData["CurrentNameFilter"]" placeholder="Search by full name" class="form-control" />
+    </div>
+    <div class="form-group flex-grow-1 me-2">
+        <label for="emailSearch" class="form-label">Search by Email:</label>
+        <input type="text" id="emailSearch" name="emailSearch" value="@ViewData["CurrentEmailFilter"]" placeholder="Search by email" class="form-control" />
+    </div>
+    <div class="form-group flex-grow-1 me-2">
+        <label for="mobileSearch" class="form-label">Search by Mobile:</label>
+        <input type="text" id="mobileSearch" name="mobileSearch" value="@ViewData["CurrentMobileFilter"]" placeholder="Search by mobile number" class="form-control" />
+    </div>
+    <div class="form-group flex-grow-1 me-2">
+        <label for="dobSearch" class="form-label">Search by Date of Birth:</label>
+        <input type="date" id="dobSearch" name="dobSearch" value="@ViewData["CurrentDobFilter"]" class="form-control" />
+    </div>
+    <div class="form-group d-flex align-items-end">
+        <input type="submit" value="Search" class="btn btn-primary" />
     </div>
 </form>
 
@@ -18,13 +31,17 @@
     <thead>
         <tr>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">First Name</a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">Full Name</a>
             </th>
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]">Email</a>
             </th>
-            <th>Mobile</th>
-            <th>Date of Birth</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["MobileSortParm"]">Mobile</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DateOfBirthSortParm"]">Date of Birth</a>
+            </th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -51,7 +68,7 @@
         @if (Model.HasPreviousPage)
         {
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)">Previous</a>
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)" asp-route-sortOrder="@ViewData["CurrentSortOrder"]" asp-route-nameSearch="@ViewData["CurrentNameFilter"]" asp-route-emailSearch="@ViewData["CurrentEmailFilter"]" asp-route-mobileSearch="@ViewData["CurrentMobileFilter"]" asp-route-dobSearch="@ViewData["CurrentDobFilter"]">Previous</a>
             </li>
         }
         else
@@ -72,7 +89,7 @@
             else
             {
                 <li class="page-item">
-                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i" asp-route-sortOrder="@ViewData["CurrentSortOrder"]" asp-route-nameSearch="@ViewData["CurrentNameFilter"]" asp-route-emailSearch="@ViewData["CurrentEmailFilter"]" asp-route-mobileSearch="@ViewData["CurrentMobileFilter"]" asp-route-dobSearch="@ViewData["CurrentDobFilter"]">@i</a>
                 </li>
             }
         }
@@ -80,7 +97,7 @@
         @if (Model.HasNextPage)
         {
             <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)">Next</a>
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)" asp-route-sortOrder="@ViewData["CurrentSortOrder"]" asp-route-nameSearch="@ViewData["CurrentNameFilter"]" asp-route-emailSearch="@ViewData["CurrentEmailFilter"]" asp-route-mobileSearch="@ViewData["CurrentMobileFilter"]" asp-route-dobSearch="@ViewData["CurrentDobFilter"]">Next</a>
             </li>
         }
         else

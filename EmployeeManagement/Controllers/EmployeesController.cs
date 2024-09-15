@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using EmployeeManagement.Models;
 using EmployeeManagement.Data;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,19 +15,46 @@ public class EmployeesController : Controller
         _context = context;
     }
 
-    // GET: Employees (Index action for listing employees)
-    public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
+
+    public async Task<IActionResult> Index(
+     string sortOrder,
+     string nameSearch,
+     string emailSearch,
+     string mobileSearch,
+     DateTime? dobSearch,
+     int? pageNumber)
     {
         ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
         ViewData["EmailSortParm"] = sortOrder == "Email" ? "email_desc" : "Email";
-        ViewData["CurrentFilter"] = searchString;
+        ViewData["MobileSortParm"] = sortOrder == "Mobile" ? "mobile_desc" : "Mobile";
+        ViewData["DateOfBirthSortParm"] = sortOrder == "DateOfBirth" ? "dob_desc" : "DateOfBirth";
+        ViewData["CurrentNameFilter"] = nameSearch;
+        ViewData["CurrentEmailFilter"] = emailSearch;
+        ViewData["CurrentMobileFilter"] = mobileSearch;
+        ViewData["CurrentDobFilter"] = dobSearch?.ToString("yyyy-MM-dd");
 
         var employees = from e in _context.Employees select e;
 
-        // Search functionality
-        if (!string.IsNullOrEmpty(searchString))
+        // Case-insensitive full name search
+        if (!string.IsNullOrEmpty(nameSearch))
         {
-            employees = employees.Where(e => e.FirstName.Contains(searchString) || e.Email.Contains(searchString));
+            var lowerCaseNameSearch = nameSearch.ToLower();
+            employees = employees.Where(e => (e.FirstName + " " + e.LastName).ToLower().Contains(lowerCaseNameSearch));
+        }
+        if (!string.IsNullOrEmpty(emailSearch))
+        {
+            var lowerCaseEmailSearch = emailSearch.ToLower();
+            employees = employees.Where(e => e.Email.ToLower().Contains(lowerCaseEmailSearch));
+        }
+        if (!string.IsNullOrEmpty(mobileSearch))
+        {
+            var lowerCaseMobileSearch = mobileSearch.ToLower();
+            employees = employees.Where(e => e.Mobile.ToLower().Contains(lowerCaseMobileSearch));
+        }
+        if (dobSearch.HasValue)
+        {
+            var dob = dobSearch.Value.Date;
+            employees = employees.Where(e => e.DateOfBirth.Date == dob);
         }
 
         // Sorting functionality
@@ -35,36 +63,50 @@ public class EmployeesController : Controller
             "name_desc" => employees.OrderByDescending(e => e.FirstName),
             "Email" => employees.OrderBy(e => e.Email),
             "email_desc" => employees.OrderByDescending(e => e.Email),
+            "Mobile" => employees.OrderBy(e => e.Mobile),
+            "mobile_desc" => employees.OrderByDescending(e => e.Mobile),
+            "DateOfBirth" => employees.OrderBy(e => e.DateOfBirth),
+            "dob_desc" => employees.OrderByDescending(e => e.DateOfBirth),
             _ => employees.OrderBy(e => e.FirstName),
         };
 
         // Pagination functionality
         int pageSize = 10;
-        return View(await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize));
+        var paginatedEmployees = await PaginatedList<Employee>.CreateAsync(employees.AsNoTracking(), pageNumber ?? 1, pageSize);
+
+        // For debugging: Check the count of employees returned
+        Console.WriteLine($"Number of employees found: {paginatedEmployees.Count}");
+
+        return View(paginatedEmployees);
     }
 
-    // GET: Employees/Create
+
+
+
+
     [HttpGet]
     public IActionResult Create()
     {
-        return View(); // This will look for a Create.cshtml view inside Views/Employees folder
+        return View(); 
     }
 
-    // POST: Employees/Create
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,Mobile,DateOfBirth,Photo")] Employee employee)
+    public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,Mobile,DateOfBirth")] Employee employee)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            // Ensure DateOfBirth is in UTC
-            employee.DateOfBirth = DateTime.SpecifyKind(employee.DateOfBirth, DateTimeKind.Utc);
-
-            _context.Add(employee);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Json(new { success = false, message = "Invalid data." });
         }
-        return View(employee);
+
+        employee.DateOfBirth = employee.DateOfBirth.ToUniversalTime();
+
+        _context.Add(employee);
+        await _context.SaveChangesAsync();
+
+        
+        return Json(new { success = true, message = "Employee successfully created!" });
     }
 
     // GET: Employees/Edit/5
@@ -82,11 +124,52 @@ public class EmployeesController : Controller
             return NotFound();
         }
 
-        return View(employee);  // This will return the Edit view (Edit.cshtml)
+        employee.DateOfBirth = employee.DateOfBirth.ToLocalTime();
+
+        return View(employee); 
     }
 
+    // POST: Employees/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Employee employee)
+    {
+        if (!ModelState.IsValid)
+        {
+            return Json(new { success = false, message = "Invalid data." });
+        }
 
-    // GET: Employees/Delete/5
+        try
+        {
+            employee.DateOfBirth = employee.DateOfBirth.ToUniversalTime(); 
+
+            _context.Update(employee);
+            int rowsAffected = await _context.SaveChangesAsync();
+
+            if (rowsAffected > 0)
+            {
+             
+                return Json(new { success = true, message = "Employee successfully edited!" });
+            }
+            else
+            {
+                
+                return Json(new { success = false, message = "No changes were made." });
+            }
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+           
+            return Json(new { success = false, message = "Failed to edit employee due to concurrency issues." });
+        }
+        catch (Exception ex)
+        {
+         
+            return Json(new { success = false, message = $"Error: {ex.Message}" });
+        }
+    }
+
+    
     [HttpGet]
     public async Task<IActionResult> Delete(int? id)
     {
@@ -102,57 +185,27 @@ public class EmployeesController : Controller
             return NotFound();
         }
 
-        return View(employee); // This will look for Delete.cshtml in Views/Employees folder
+        return View(employee); 
     }
 
-    // POST: Employees/Delete/5
+    
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var employee = await _context.Employees.FindAsync(id);
+        if (employee == null)
+        {
+            return NotFound();
+        }
+
         _context.Employees.Remove(employee);
         await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index)); // Redirect to employee list after successful delete
+        return RedirectToAction(nameof(Index)); 
     }
 
     private bool EmployeeExists(int id)
     {
         return _context.Employees.Any(e => e.Id == id);
     }
-    // POST: Employees/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,Mobile,DateOfBirth,Photo")] Employee employee)
-    {
-        if (id != employee.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                _context.Update(employee);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EmployeeExists(employee.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index)); 
-        }
-        return View(employee); 
-    }
-
-
-
 }

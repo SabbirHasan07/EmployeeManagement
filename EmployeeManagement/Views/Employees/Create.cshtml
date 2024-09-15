@@ -4,9 +4,9 @@
     ViewData["Title"] = "Add Employee";
 }
 
-<h2>Add Employee</h2>
 
-<form asp-action="Create" method="post" enctype="multipart/form-data">
+
+<form method="post" asp-controller="Employees" asp-action="Create" id="addEmployeeForm">
     <div class="form-group">
         <label asp-for="FirstName" class="control-label"></label>
         <input asp-for="FirstName" class="form-control" />
@@ -32,12 +32,65 @@
         <input asp-for="DateOfBirth" class="form-control" type="date" />
         <span asp-validation-for="DateOfBirth" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Photo" class="control-label"></label>
-        <input asp-for="Photo" class="form-control" type="file" />
-        <span asp-validation-for="Photo" class="text-danger"></span>
-    </div>
-    <div class="form-group">
+    <div class="form-group mt-4">
         <input type="submit" value="Add Employee" class="btn btn-primary" />
     </div>
 </form>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Employee Added</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Employee has been successfully added!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+      
+        document.getElementById('addEmployeeForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json()) 
+                .then(data => {
+                    if (data.success) {
+                        
+                        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        successModal.show();
+
+                     
+                        form.reset();
+
+                      
+                        document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
+                            window.location.href = '/Employees/Index';
+                        });
+                    } else {
+                      
+                        alert('Error adding employee');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+}

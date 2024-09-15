@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EmployeeManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240914091452_initail")]
-    partial class initail
+    [Migration("20240915100223_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,10 +49,6 @@ namespace EmployeeManagement.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Mobile")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Photo")
                         .IsRequired()
                         .HasColumnType("text");
 

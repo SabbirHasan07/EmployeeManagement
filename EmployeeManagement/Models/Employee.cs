@@ -23,6 +23,6 @@ namespace EmployeeManagement.Models
         }
         private DateTime _dateOfBirth;
 
-        public string Photo { get; set; }
+      
     }
 }
